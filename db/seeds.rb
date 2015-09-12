@@ -1,9 +1,9 @@
 require 'csv'
 
-def people(file)
+def people_1(file)
   CSV.foreach(file, options = {:headers => true, :header_converters => :symbol, :converters => :all}) do |row|
     Person.create!({
-     gender: row[1],
+     gender: row[1] == "M" ? 1 : 0,
      weight: row[2],
      height: row[3]
      })
@@ -13,7 +13,7 @@ end
 def people_2(file)
   CSV.foreach(file, options = {:headers => true, :header_converters => :symbol, :converters => :all}) do |row|
     Person.create!({
-      gender: row[0],
+      gender: row[0] == "Male" ? 1 : 0,
       height: row[1],
       weight: row[2]
       })
@@ -21,5 +21,5 @@ def people_2(file)
 end
 
 
-# people('db/people.csv')
-people_2('db/people_2.csv')
+people_1('db/people_1.csv')
+# people_2('db/people_2.csv')

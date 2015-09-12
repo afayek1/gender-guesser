@@ -4,6 +4,6 @@ module PeopleHelper
 	end
 
 	def render_probability(n)
-		(n*100).round(2).to_s
+		(n*100).round(5).to_s
 	end
 end

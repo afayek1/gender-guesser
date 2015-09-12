@@ -1,55 +1,48 @@
+require 'matrix'
+
 class Person < ActiveRecord::Base
-	def self.males
-		Person.where(gender: ["M","Male"] )
-	end
+    include LogisticRegression
+    mattr_accessor :theta, instance_accessor: false do
+        Matrix.zero(1, (2+1))
+    end
 
-	def self.females
-		Person.where(gender: ["F","Female"] )
-	end
+    def self.train
+        # SETUP
+        # Number in training sample
+        m = self.count.to_f
+        # Number of features
+        n = 2
+        # Initialize thetas for each attribute plus the intercept
+        @@theta ||= Matrix.zero(1, (n+1))
+        # Load data in Matrix form for easier calculations 
+        x = Matrix[*Person.pluck(1, :height, :weight)]
+        y = Matrix.column_vector(Person.pluck(:gender))
+        max_iterations = 10
 
-	
+        ## RUN
+        max_iterations.times do
+            z = x * @@theta.transpose
+            h = z.collect { |row| LogisticRegression.sigmoid(row) }
+            
+            gradient = (1/m) * x.transpose * (h-y)
+            unary_minus = h.collect { |row| 1-row }
+            hessian = (1/m) * x.transpose * Matrix.diagonal(*h.to_a.flatten) * Matrix.diagonal(*unary_minus.to_a.flatten) * x
+            
+            @@theta = (@@theta.transpose - (hessian.inverse * gradient)).transpose
+        end
+    end
 
-	def guess_gender
-		# Base rates
-		n_males = Person.where(gender: ["M","Male"] ).count
-		n_females = Person.where(gender: ["F","Female"] ).count
-		n_samples = (n_males + n_females).to_f
-		
-		p_male = n_males/n_samples
-		p_female = n_females/n_samples
-
-		#Probability of evidence
-		population_given_weight = Person.where(weight: self.weight)
-		population_given_height = Person.where(height: self.height)
-		
-		p_weight = population_given_weight.count/n_samples
-		p_height = population_given_height.count/n_samples
-
-		# Probability of Likelihood
-		n_men_given_weight = population_given_weight.where(gender: ["M", "Male"]).count.to_f
-		n_women_given_weight = population_given_weight.count - n_men_given_weight
-		n_men_given_height = population_given_height.where(gender: ["M", "Male"]).count.to_f
-		n_women_given_height = population_given_height.count - n_men_given_height
-		
-		p_men_given_weight = n_men_given_weight/population_given_weight.count
-		p_women_given_weight = n_women_given_weight/population_given_weight.count
-		p_men_given_height = n_men_given_height/population_given_height.count
-		p_women_given_height = n_women_given_height/population_given_height.count
-
-
-		# Naive classification
-		p_evidence = (p_weight*p_height)
-		p_is_a_man = (p_men_given_weight*p_men_given_height*p_male)/p_evidence
-		p_is_a_woman = (p_women_given_weight*p_women_given_height*p_female)/p_evidence		
-		
-		if p_is_a_man > p_is_a_woman
-			self.gender = "M"
-			return "M"
-		elsif p_is_a_man < p_is_a_woman
-			self.gender = "F"
-			return "F"
-		else
-			return "N/A"
-		end
-	end
+    def classify
+        Person.train
+        z = (Matrix[[1,self.height,self.weight]]*@@theta.transpose)[0,0]
+        probability_is_a_man = 1 - LogisticRegression.sigmoid(-z)
+        
+        if probability_is_a_man >= 0.5
+            self.gender = 1
+            probability_is_a_man
+        else
+            self.gender = 0
+            1 - probability_is_a_man
+        end
+    end
 end

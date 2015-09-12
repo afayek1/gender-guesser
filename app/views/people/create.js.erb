@@ -1,1 +1,2 @@
-$("#guess").html("Gender is..." + "<%= escape_javascript(@person.guess_gender) %>")
+$("#probability").html("There is a " + "<%= escape_javascript(render_probability(@probability)) %>" + "% chance this person is");
+$("#gender").html("<%= escape_javascript(render_gender(@person.gender)) %>");

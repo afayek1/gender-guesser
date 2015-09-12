@@ -2,7 +2,6 @@
   <% if @person.errors.any? %>
     <div id="error_explanation">
       <h2><%= pluralize(@person.errors.count, "error") %> prohibited this person from being saved:</h2>
-
       <ul>
       <% @person.errors.full_messages.each do |message| %>
         <li><%= message %></li>
@@ -15,12 +14,13 @@
     <%= f.label :height %> (cm)<br>
     <%= f.number_field :height %>
   </div>
+
   <div class="field">
     <%= f.label :weight %> (kg)<br>
     <%= f.number_field :weight %>
   </div>
 
   <div class="actions">
-    <%= f.submit %>
+    <%= f.submit "Guess Gender"%>
   </div>
 <% end %>

@@ -1,28 +1,13 @@
-== README
+#Gender Guesser
+Gender Guesser guesses your gender based on height and weight by using a classification algorithm. This app is meant to be a proof of concept than anything practical.
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+## Deployment instructions
 
-Things you may want to cover:
+Clone the project and navigate to the root directory. From terminal:
 
-* Ruby version
+- bundle exec rake db:migrate
+- bundle exec rake db:seed
+- rails server
 
-* System dependencies
+Navigate to [localhost:3000](http://localhost:3000)
 
-* Configuration
-
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
-
-
-Please feel free to use a different markup language if you do not plan to run
-<tt>rake doc:app</tt>.
